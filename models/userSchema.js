@@ -15,7 +15,8 @@ const UserSchema = new Schema({
             won: { type: Number, default: 0 },
             lost: {type: Number, default: 0 }
         }
-    }
+    },
+    warnings: { type: Array, default: []}
 }, {
     versionKey: false
 });
