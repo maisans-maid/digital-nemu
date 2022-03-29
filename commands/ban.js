@@ -18,11 +18,13 @@ const command = new SlashCommandBuilder()
     .setDescription('The reason for this ban')
 )
 
-const allowedPermissions = (Guild) => [{
-    id: Guild.roles.cache.filter(x => x.permissions.has('BAN_MEMBERS')),
-    type: 'ROLE',
-    permission: true
-}];
+const allowedPermissions = Guild => Guild.roles.cache
+    .filter(role => role.permissions.has('BAN_MEMBERS'))
+    .map(role => Object.assign({
+        id: role.id,
+        type: 'ROLE',
+        permission: true,
+    }, {}));
 
 
 module.exports = {

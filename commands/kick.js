@@ -14,11 +14,13 @@ const command = new SlashCommandBuilder()
     .setDescription('The reason for this kick')
 )
 
-const allowedPermissions = (Guild) => [{
-    id: Guild.roles.cache.filter(x => x.permissions.has('KICK_MEMBERS')),
-    type: 'ROLE',
-    permission: true
-}];
+const allowedPermissions = Guild => Guild.roles.cache
+    .filter(role => role.permissions.has('KICK_MEMBERS'))
+    .map(role => Object.assign({
+        id: role.id,
+        type: 'ROLE',
+        permission: true,
+    }, {}));
 
 
 module.exports = {

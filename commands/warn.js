@@ -15,11 +15,13 @@ const command = new SlashCommandBuilder()
     .setDescription('The reason for the warn')
 )
 
-const allowedPermissions = Guild => [{
-    id: Guild.roles.cache.filter(x => x.permissions.any(['KICK_MEMBERS', 'BAN_MEMBERS'])),
-    type: 'ROLE',
-    permission: true
-}];
+const allowedPermissions = Guild => Guild.roles.cache
+    .filter(role => role.permissions.any(['BAN_MEMBERS', 'KICK_MEMBERS']))
+    .map(role => Object.assign({
+        id: role.id,
+        type: 'ROLE',
+        permission: true,
+    }, {}));
 
 module.exports = {
     builder: command,
