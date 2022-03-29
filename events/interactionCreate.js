@@ -1,5 +1,7 @@
 'use strict';
 
+const handleTicket = require('../processes/ticket-tool/handles/handle.main.js')
+
 module.exports = (client, interaction) => {
     if (interaction.isCommand()){
         const commandExecutable = client.custom.commands.get(interaction.commandName);
@@ -27,6 +29,6 @@ module.exports = (client, interaction) => {
     };
 
     if (interaction.isButton()){
-        
+        handleTicket(interaction);
     };
 };
