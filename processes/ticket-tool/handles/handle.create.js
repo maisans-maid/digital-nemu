@@ -75,6 +75,9 @@ module.exports = async function createTicket(interaction, profile, indexIfExists
 
     return profile
     .save()
-    .then(() => interaction.deferUpdate())
+    .then(() => interaction.reply({
+        ephemeral: true,
+        content: `A channel has been created for you! Please go to ${channel}`
+    }))
     .catch(error => interaction.reply(`❌ Error: ${error.message}`));
 };
