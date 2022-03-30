@@ -2,6 +2,10 @@ const { model, Schema } = require('mongoose');
 
 const UserSchema = new Schema({
     _id: String,
+    xp: {
+        type: Array,
+        default: []
+    },
     gameStats: {
         minesweeper: {
             gamesPlayed:  { type: Number, default: 0 },

@@ -7,6 +7,10 @@ const GuildSchema = new Schema({
             type: String,
             default: null
         },
+        levelUp: {
+            type: String,
+            default: null
+        },
         supportCategoryId: {
             type: String,
             default: null
@@ -23,6 +27,10 @@ const GuildSchema = new Schema({
             type: Array,
             default: []
         }
+    },
+    levelRewards: {
+        type: Array,
+        default: []
     },
     supportReasons: {
         type: Array,
