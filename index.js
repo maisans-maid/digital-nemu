@@ -1,5 +1,5 @@
 require('dotenv').config();
-// require('./fonts');
+require('./fonts');
 require('moment-duration-format');
 
 // Heroku for backup accounts, if the date is 1-25, turn off this instance.

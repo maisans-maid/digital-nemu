@@ -74,7 +74,7 @@ module.exports = {
 
         if (!profile.channels.clearMessages){
             return interaction.followUp({
-                content: `✅ Successfully deleted **${messages.size}** messages!\n\nℹ You can keep a copy of deleted messages by assigning an upload channel.`
+                content: `✅ Successfully deleted **${messages.size}** messages!\n\nℹ You can keep a copy of deleted messages by assigning an upload channel through \`\setchannel\` command.`
             });
         };
 

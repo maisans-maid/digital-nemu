@@ -181,7 +181,7 @@ module.exports = {
         const response = {
             embeds: [ embed.setFooter({ text: `Personal Win Rate: ${((win / (win + lose) || 0) * 100).toFixed(2)} % (${win}/${lose}) (W/L)` }).setColor(winner.scope === 'USER' && winner.privateEnum !== 4 ? 'GREEN' : 'RED') ],
             components: generateComponent(moveCounter, winner.scope == 'USER' ? message.components : newComponents, winner.scope == 'USER' ? x : bestMove.x, winner.scope == 'USER' ? y : bestMove.y, true),
-            content: `⚔️ This challenge has ended! You **${winner.scope === 'USER' ? 'won' : winner.privateEnum === 4 ? 'tied' : 'lost'}**.`
+            content: `⚔️ This challenge has ended! You **${winner.scope === 'USER' ? winner.privateEnum !== 4 ? 'won' : 'tied' : 'lost'}**.`
         };
 
         return profile

@@ -26,6 +26,10 @@ const GuildSchema = new Schema({
         supportCategoryChildren: {
             type: Array,
             default: []
+        },
+        welcome: {
+            type: String,
+            default: null
         }
     },
     levelRewards: {
