@@ -1,15 +1,14 @@
 'use strict';
 
-exports.createRoundedRect = function (ctx, x1, y1, x2, y2, radius) {
+exports.createRoundedRect = function (ctx, x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
     ctx.beginPath();
-    ctx.moveTo(x1, radius);
-    ctx.arcTo(x1, y1, x1 + radius, y1, radius);
-    ctx.lineTo(x2 - radius, y1);
-    ctx.arcTo(x2, y1, x2, radius, radius);
-    ctx.lineTo(x2, y2 - radius);
-    ctx.arcTo(x2, y2, x2-radius ,y2 ,radius);
-    ctx.lineTo(radius, y2);
-    ctx.arcTo(x1, y2, x1, y2 - radius, radius);
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
     ctx.closePath();
 };
 

@@ -16,6 +16,14 @@ const command = new SlashCommandBuilder()
     )
 )
 .addSubcommand(subcommand => subcommand
+    .setName('levelup')
+    .setDescription('Set the selected channel to send a levelup notification for all members')
+    .addChannelOption(option => option
+        .setName('text-channel')
+        .setDescription('The text channel to use. Leave blank to remove channel.')
+    )
+)
+.addSubcommand(subcommand => subcommand
     .setName('welcomemessage')
     .setDescription('Set the selected channel to send a message everytime a member joins this server.')
     .addChannelOption(option => option
@@ -73,6 +81,15 @@ module.exports = {
                 response = '✅ Successfully disabled the welcome message feature.'
             } else {
                 response = '✅ Successfully enabled the welcome message feature.'
+            };
+        };
+
+        if (subcommand === 'levelup'){
+            profile.channels.levelUp = channel ? channel.id : null;
+            if (profile.channels.welcome === null){
+                response = '✅ Successfully disabled the levelup notification.'
+            } else {
+                response = `✅ Users that level up will be notified at ${channel}.`
             };
         };
 

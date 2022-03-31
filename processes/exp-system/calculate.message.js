@@ -2,10 +2,12 @@
 
 const { Collection } = require('discord.js');
 const _ = require('lodash');
+const { join } = require('path');
 
 const Calculate = require('./calculate.main.js');
 const guildModel = require('../../models/guildSchema.js');
 const userModel = require('../../models/userSchema.js');
+const getLevelUpImg = require(join(__dirname, '../../utility/Canvas.levelup.js'));
 
 module.exports = async (client, message) => {
     let status = 'fail';
@@ -59,10 +61,13 @@ module.exports = async (client, message) => {
         if (previousLevel < userProfile.xp.find(x => x.id === message.guild.id).level){
             if (guildProfile.channels.levelUp){
                 const channel = message.guild.channels.cache.get(guildProfile.channels.levelUp);
-                if (channel){
+                if (channel && channel.permissionsFor(client.user).has(['VIEW_CHANNEL','SEND_MESSAGES','ATTACH_FILES'])){
                     channel.send({
-                        ephemeral: true,
-                        content: '# PROC :: <Canvas.levelup.js>'
+                        content: `${message.member}, you leveled up!`,
+                        files: [{
+                            name: 'levelUp.png',
+                            attachment: await getLevelUpImg(message.member, userProfile)
+                        }]
                     });
                 };
             };
