@@ -34,6 +34,7 @@ const allowedPermissions = (Guild) => [{
 // Export executable
 module.exports = {
     builder: command,
+    permissions: allowedPermissions,
     execute: async (client, interaction) => {
 
     const isNotDuplicate = await checkDuplicateInstance(interaction, basename(__filename, '.js'));

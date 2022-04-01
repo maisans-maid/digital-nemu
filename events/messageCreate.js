@@ -2,13 +2,9 @@
 
 const deploy = require('../utility/Commands.deploy.js');
 const calculateXP = require('../processes/exp-system/calculate.message.js');
+const verify = require('../processes/verify/verify.text.js');
 
 module.exports = async (client, message) => {
-    if (message.content === 'deploycommands::21124'){
-        if (message.member.permissions.has('MANAGE_GUILD')){
-            deploy(client, message.guild)
-        }
-    }
 
     if (message.author.bot) return;
 
@@ -19,4 +15,9 @@ module.exports = async (client, message) => {
     if (errors.length){
         console.log(errors);
     };
+
+    /**
+     * Verification System for Digital Nemu
+     */
+    verify(message);
 };

@@ -22,7 +22,7 @@ const client = new Client({
 
 client.custom = {
     cache: {
-        guildSchema: new Collection(),
+        guildSchemaPartials: new Collection(),
         talkingUsers: new Collection(),
         usersOnVC: new Collection(),
         games: new Collection()

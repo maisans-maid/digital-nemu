@@ -32,6 +32,14 @@ const command = new SlashCommandBuilder()
     )
 )
 .addSubcommand(subcommand => subcommand
+    .setName('verify')
+    .setDescription('Set the selected channel as verification channel.')
+    .addChannelOption(option => option
+        .setName('text-channel')
+        .setDescription('The text channel to use. Leave blank to remove channel.')
+    )
+)
+.addSubcommand(subcommand => subcommand
     .setName('welcomemessage')
     .setDescription('Set the selected channel to send a message everytime a member joins this server.')
     .addChannelOption(option => option
@@ -118,6 +126,24 @@ module.exports = {
                 response = `✅ Important logs will be displayed at ${channel}.`
                 if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES', 'EMBED_LINKS'])){
                     response += '\n⚠ Please make sure my **View Channel, Send Messages, Attach Files, **and **Embed Links** Permissions are enabled on that channel!'
+                };
+            };
+        };
+
+        if (subcommand === 'verify'){
+            profile.channels.verification = channel ? channel.id : null;
+            const guildSchemaPartial = client.custom.cache.guildSchemaPartials.get(interaction.guildId) || {};
+            guildSchemaPartial.verificationChannelId = profile.roles.verification;
+            client.custom.cache.guildSchemaPartials.set(interaction.guildId, guildSchemaPartial);
+            if (profile.channels.verification === null){
+                response = '✅ Successfully disabled the verification feature.'
+            } else {
+                response = `✅ Reading verification requests at ${channel}! While this is on, any messages sent on that channel will be automatically deleted.`
+                if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'MANAGE_MESSAGES'])){
+                    response += '\n⚠ Please make sure my **View Channel** and **Manage Messages** Permission is enabled on that channel!'
+                };
+                if (!interaction.guild.roles.cache.get(profile.roles.verification)){
+                    response += '\n⚠ Verification role not set! Please set a verification role!'
                 };
             };
         };

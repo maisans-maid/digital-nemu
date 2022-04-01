@@ -31,7 +31,17 @@ const GuildSchema = new Schema({
             type: String,
             default: null
         },
+        verification: {
+            type: String,
+            default: null
+        },
         welcome: {
+            type: String,
+            default: null
+        }
+    },
+    roles: {
+        verification: {
             type: String,
             default: null
         }

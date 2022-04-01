@@ -21,7 +21,7 @@ module.exports = (Client, Guild) => {
     };
   };
 
-  rest.put(Routes.applicationGuildCommands(Client.user.id, Guild.id),{ body: commands })
+  return rest.put(Routes.applicationGuildCommands(Client.user.id, Guild.id),{ body: commands })
   .then(() => console.log('Successfully registered application (/) commands.'))
   //.catch(e => console.log(e.rawError.errors.options['1']));
 }
