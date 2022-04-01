@@ -27,6 +27,10 @@ const GuildSchema = new Schema({
             type: Array,
             default: []
         },
+        logger: {
+            type: String,
+            default: null
+        },
         welcome: {
             type: String,
             default: null

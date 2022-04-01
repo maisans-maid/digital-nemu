@@ -13,6 +13,7 @@ const { readdirSync } = require('fs');
 
 const client = new Client({
     intents: [ ...Object.keys(Intents.FLAGS) ],
+    partials: [ 'MESSAGE' ],
     presence: { status: 'dnd', activities: [{
         name: 'Pusanggala v0.1.0',
         type: 'PLAYING',

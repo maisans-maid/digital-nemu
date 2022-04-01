@@ -24,6 +24,14 @@ const command = new SlashCommandBuilder()
     )
 )
 .addSubcommand(subcommand => subcommand
+    .setName('logger')
+    .setDescription('Set the selected channel to send a message for sending audit logs.')
+    .addChannelOption(option => option
+        .setName('text-channel')
+        .setDescription('The text channel to use. Leave blank to remove channel.')
+    )
+)
+.addSubcommand(subcommand => subcommand
     .setName('welcomemessage')
     .setDescription('Set the selected channel to send a message everytime a member joins this server.')
     .addChannelOption(option => option
@@ -72,6 +80,9 @@ module.exports = {
                 response = '✅ Successfully disabled clearmessage history upload feature.'
             } else {
                 response = `✅ Deleted message history will now be archived at ${channel}!`
+                if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES'])){
+                    response += '\n⚠ Please make sure my **View Channel, Send Messages, **and **Attach Files** Permissions are enabled on that channel!'
+                };
             };
         };
 
@@ -81,15 +92,33 @@ module.exports = {
                 response = '✅ Successfully disabled the welcome message feature.'
             } else {
                 response = '✅ Successfully enabled the welcome message feature.'
+                if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES'])){
+                    response += '\n⚠ Please make sure my **View Channel, Send Messages, **and **Attach Files** Permissions are enabled on that channel!'
+                };
             };
         };
 
         if (subcommand === 'levelup'){
             profile.channels.levelUp = channel ? channel.id : null;
-            if (profile.channels.welcome === null){
+            if (profile.channels.levelUp === null){
                 response = '✅ Successfully disabled the levelup notification.'
             } else {
                 response = `✅ Users that level up will be notified at ${channel}.`
+                if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES'])){
+                    response += '\n⚠ Please make sure my **View Channel, Send Messages, **and **Attach Files** Permissions are enabled on that channel!'
+                };
+            };
+        };
+
+        if (subcommand === 'logger'){
+            profile.channels.logger = channel ? channel.id : null;
+            if (profile.channels.logger === null){
+                response = '✅ Successfully disabled the audit-logging feature.'
+            } else {
+                response = `✅ Important logs will be displayed at ${channel}.`
+                if (!channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES', 'EMBED_LINKS'])){
+                    response += '\n⚠ Please make sure my **View Channel, Send Messages, Attach Files, **and **Embed Links** Permissions are enabled on that channel!'
+                };
             };
         };
 
