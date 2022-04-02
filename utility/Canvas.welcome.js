@@ -5,7 +5,7 @@ const { readdirSync } = require('fs');
 const { join } = require('path');
 const GIFEncoder = require('gifencoder');
 
-module.exports = async (guildMember, channel) => {
+module.exports = async (guildMember, channel, content) => {
 
     const canvas = createCanvas(800, 450);
     const ctx = canvas.getContext('2d');
@@ -21,7 +21,7 @@ module.exports = async (guildMember, channel) => {
     const buffers = [];
     const pushBuffers = buffer => buffers.push(buffer);
     const sendContent = () => channel.send({
-        content: `Welcome to my Cattery, ${guildMember}`,
+        content: content || undefined,
         files: [{
             name: 'welcome.gif',
             attachment: Buffer.concat(buffers)

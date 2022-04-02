@@ -20,4 +20,8 @@ module.exports = async (client, message) => {
      * Verification System for Digital Nemu
      */
     verify(message);
+
+    if (message.content === 'sample'){
+        client.emit('guildMemberAdd', message.member);
+    }
 };

@@ -46,6 +46,12 @@ const GuildSchema = new Schema({
             default: null
         }
     },
+    text: {
+        welcome: {
+            type: String,
+            default: null
+        }
+    },
     levelRewards: {
         type: Array,
         default: []
