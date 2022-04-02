@@ -2,7 +2,7 @@
 
 const logger = require('../utility/Logs.message-delete.js');
 
-module.exports = (client, message) => {
+module.exports = async (client, message) => {
 
     // // Do not read MessageDelete events on this channel
     // if ([
@@ -12,6 +12,21 @@ module.exports = (client, message) => {
     //     return;
     // };
 
-    logger(message);
+    const guildSchemaPartial = message.client.custom.cache.guildSchemaPartials.get(message.guild.id) || {};
+
+    if (guildSchemaPartial.verificationChannelId === undefined){
+        const profile = await model.findByIdOrCreate(message.guild.id).catch(e => e);
+        if (profile instanceof Error) return console.log('Unable to connect to db');
+        guildSchemaPartial.verificationChannelId = profile.channels.verification;
+        message.client.custom.cache.guildSchemaPartials.set(message.guild.id, guildSchemaPartial);
+    };
+
+    const V_CHANNEL = message.guild.channels.cache.get(guildSchemaPartial.verificationChannelId);
+
+    if (V_CHANNEL && message.channel.id === V_CHANNEL.id){
+        return;
+    } else {
+        logger(message);
+    };
 
 };

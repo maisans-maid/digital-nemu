@@ -5,7 +5,7 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = async message => {
 
-    return;
+    // return;
 
     if (message.bot){
         return;
@@ -39,10 +39,34 @@ module.exports = async message => {
     const V_CHANNEL = message.guild.channels.cache.get(guildSchemaPartial.verificationChannelId);
     const L_CHANNEL = message.guild.channels.cache.get(guildSchemaPartial.loggerChannelId);
     const V_ROLE = message.guild.roles.cache.get(guildSchemaPartial.verificationRoleId);
-    const embed = new MessageEmbed().setAuthor({ name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}` }).setColor('ORANGE')
+    const embed = new MessageEmbed().setAuthor({ name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}` }).setColor('ORANGE');
 
-    if (V_CHANNEL && !message.guild.me.roles.cache.has('MANAGE_ROLES')){
-        await message.delete().catch(() => {});
+    if (message.content === 'sleepy head' && !V_CHANNEL){
+        // Verification is set but the id is now invalid
+        embed.addFields([{
+            name: 'Reason',
+            value: `Invalid verification channelId. (sleepy head) used at ${message.channel}`
+        },{
+            name: 'Suggested Fix',
+            value: 'Reset the verification channel via the \`\setchannel\` command.'
+        }]);
+        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
+            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member.displayName}. Reason: Invalid verification channelId. Suggested Fix: Reset the verification channel via the \`\setchannel\` command.`);
+        };
+        return L_CHANNEL.send({ embeds: [embed] });
+    };
+
+    if (!V_CHANNEL){
+        return;
+    };
+
+    if (message.channel.id !== V_CHANNEL.id){
+        return;
+    };
+
+    await message.delete().catch(() => {});
+
+    if (!message.guild.me.permissions.has('MANAGE_ROLES')){
         embed.addFields([{
             name: 'Reason',
             value: 'I have no permission to add roles.'
@@ -56,28 +80,7 @@ module.exports = async message => {
         return L_CHANNEL.send({ embeds: [embed] });
     };
 
-    if (!V_CHANNEL){
-        await message.delete().catch(() => {});
-        // Verification is set but the id is now invalid
-        embed.addFields([{
-            name: 'Reason',
-            value: 'Invalid verification channelId'
-        },{
-            name: 'Suggested Fix',
-            value: 'Reset the verification channel via the \`\setchannel\` command.'
-        }]);
-        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
-            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member.displayName}. Reason: Invalid verification channelId. Suggested Fix: Reset the verification channel via the \`\setchannel\` command.`);
-        };
-        return L_CHANNEL.send({ embeds: [embed] });
-    };
-
-    if (message.channel.id !== V_CHANNEL.id){
-        return;
-    };
-
     if (!V_ROLE){
-        await message.delete().catch(() => {});
         embed.addFields([{
             name: 'Reason',
             value: 'Invalid verification roleId'
@@ -91,20 +94,16 @@ module.exports = async message => {
         return L_CHANNEL.send({ embeds: [embed] });
     };
 
-    if (message.channel.id === V_CHANNEL.id){
-        await message.delete().catch(() => {});
-    };
-
     if (message.content !== 'sleepy head'){
-        return;
+        return ;
     };
 
     if (message.member.roles.cache.has(V_ROLE.id)){
-        return; // Member already has the verified role
+        return ; // Member already has the verified role
     };
 
     await message.member.roles.add(V_ROLE.id)
         .then(() => {/*Insert code here what to do if a member is verified*/})
-        .catch(() => {});
+        .catch(console.error);
 
 };
