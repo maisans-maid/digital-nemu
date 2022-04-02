@@ -18,7 +18,7 @@ module.exports = async (Client, Guild) => {
     for (const commandFile of readdirSync(join(__dirname, '../commands')).filter(f => filter(f))){
       const { builder, permissions } = require(join(__dirname, '../commands', commandFile));
       if (builder instanceof SlashCommandBuilder){
-        commandWithPermissions.push({ name: builder.name, permissions});
+        Permissions.push({ name: builder.name, permissions});
         commands.push(builder.setDefaultPermission(false).toJSON());
       };
     };
