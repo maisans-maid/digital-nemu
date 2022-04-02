@@ -29,7 +29,7 @@ module.exports = async (Client, Guild) => {
 
 
     const Commands = Guild.commands.fetch();
-    let fullPermissions = commands.filter(command => Permissions.some(x => x.name === command.name))
+    let fullPermissions = Commands.filter(command => Permissions.some(x => x.name === command.name))
         .map(command => {
             return {
                 id: command.id,
