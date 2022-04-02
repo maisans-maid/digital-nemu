@@ -103,7 +103,7 @@ module.exports = {
 
         if (subcommand === 'welcomemessage'){
             profile.channels.welcome = channel ? channel.id : null;
-            if (profile.channel.welcome === null){
+            if (profile.channels.welcome === null){
                 response = '✅ Successfully disabled the welcome message feature.'
             } else {
                 response = '✅ Successfully enabled the welcome message feature.'
