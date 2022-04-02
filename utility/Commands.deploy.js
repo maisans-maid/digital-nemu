@@ -10,18 +10,32 @@ const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
 module.exports = (Client, Guild) => {
 
-  const commands = [];
-  const filter = (f) => f.split('.').pop() === 'js';
+    const commands = [];
+    const Permissions = [];
+    const filter = (f) => f.split('.').pop() === 'js';
 
-  // Get commands to register
-  for (const commandFile of readdirSync(join(__dirname, '../commands')).filter(f => filter(f))){
-    const { builder } = require(join(__dirname, '../commands', commandFile));
-    if (builder instanceof SlashCommandBuilder){
-      commands.push(builder.setDefaultPermission(false).toJSON());
+    // Get commands to register
+    for (const commandFile of readdirSync(join(__dirname, '../commands')).filter(f => filter(f))){
+      const { builder, permissions } = require(join(__dirname, '../commands', commandFile));
+      if (builder instanceof SlashCommandBuilder){
+        commandWithPermissions.push({ name: builder.name, permissions});
+        commands.push(builder.setDefaultPermission(false).toJSON());
+      };
     };
-  };
 
-  return rest.put(Routes.applicationGuildCommands(Client.user.id, Guild.id),{ body: commands })
-  .then(() => console.log('Successfully registered application (/) commands.'))
-  //.catch(e => console.log(e.rawError.errors.options['1']));
-}
+    await rest.put(Routes.applicationGuildCommands(Client.user.id, Guild.id),{ body: commands })
+    .then(() => console.log('Successfully registered application (/) commands.'))
+    //.catch(e => console.log(e.rawError.errors.options['1']));
+
+
+    const Commands = Guild.commands.fetch();
+    let fullPermissions = commands.filter(command => Permissions.some(x => x.name === command.name))
+        .map(command => {
+            return {
+                id: command.id,
+                permissions: Permission.find(p => p.name === command.name).permissions(Guild)//.splice(0,10)
+            };
+        });
+
+    return Guild.commands.permissions.set({ fullPermissions });
+};
