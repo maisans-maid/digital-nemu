@@ -70,6 +70,10 @@ module.exports = async message => {
         return L_CHANNEL.send({ embeds: [embed] });
     };
 
+    if (message.channel.id !== V_CHANNEL.id){
+        return;
+    };
+
     if (!V_ROLE){
         await message.delete().catch(() => {});
         embed.addFields([{
