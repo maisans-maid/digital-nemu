@@ -39,7 +39,23 @@ module.exports = async message => {
     const V_ROLE = message.guild.roles.cache.get(guildSchemaPartial.verificationRoleId);
     const embed = new MessageEmbed().setAuthor({ name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}` }).setColor('ORANGE')
 
+    if (!message.guild.me.roles.cache.has('MANAGE_ROLES')){
+        await message.delete().catch(() => {});
+        embed.addFields([{
+            name: 'Reason',
+            value: 'I have no permission to add roles.'
+        },{
+            name: 'Suggested Fix',
+            value: 'Grant me the `Manage Roles` permission.'
+        }]);
+        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
+            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member.displayName}. Reason: I have no permission to add roles. Suggested Fix: Grant me the \`Manage Roles\` permission.`);
+        };
+        return L_CHANNEL.send({ embeds: [embed] });
+    };
+
     if (!V_CHANNEL){
+        await message.delete().catch(() => {});
         // Verification is set but the id is now invalid
         embed.addFields([{
             name: 'Reason',
@@ -55,6 +71,7 @@ module.exports = async message => {
     };
 
     if (!V_ROLE){
+        await message.delete().catch(() => {});
         embed.addFields([{
             name: 'Reason',
             value: 'Invalid verification roleId'
@@ -80,7 +97,6 @@ module.exports = async message => {
         return; // Member already has the verified role
     };
 
-    await message.delete().catch(() => {});
     await message.member.roles.add(V_ROLE.id)
         .then(() => {/*Insert code here what to do if a member is verified*/})
         .catch(() => {});
