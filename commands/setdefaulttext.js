@@ -37,7 +37,7 @@ module.exports = {
         };
 
         const subcommand = interaction.options.getSubcommand();
-        const content = interaction.options.getChannel('message');
+        const content = interaction.options.getString('message');
 
         const profile = await model.findByIdOrCreate(interaction.guildId).catch(e => e);
 
