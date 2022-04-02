@@ -13,11 +13,13 @@ const command = new SlashCommandBuilder()
     .setRequired(true)
 )
 
-const allowedPermissions = (Guild) => [{
-    id: Guild.roles.cache.filter(x => x.permissions.has('MANAGE_MESSAGES')),
-    type: 'ROLE',
-    permission: true
-}];
+const allowedPermissions = Guild => Guild.roles.cache
+    .filter(role => role.permissions.has('MANAGE_MESSAGES'))
+    .map(role => Object.assign({
+        id: role.id,
+        type: 'ROLE',
+        permission: true,
+    }, {}));
 
 
 module.exports = {

@@ -33,7 +33,7 @@ module.exports = async (Client, Guild) => {
         .map(command => {
             return {
                 id: command.id,
-                permissions: Permissions.find(p => p.name === command.name).permissions(Guild)//.splice(0,10)
+                permissions: Permissions.find(p => p.name === command.name).permissions(Guild).splice(0,10)
             };
         });
 
