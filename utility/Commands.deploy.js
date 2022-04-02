@@ -8,7 +8,7 @@ const { join } = require('path');
 
 const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
 
-module.exports = (Client, Guild) => {
+module.exports = async (Client, Guild) => {
 
     const commands = [];
     const Permissions = [];
