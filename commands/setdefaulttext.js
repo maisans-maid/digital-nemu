@@ -50,7 +50,7 @@ module.exports = {
 
         let response;
 
-        if (subcommand === 'welcomemessage'){
+        if (subcommand === 'welcome-message'){
             profile.text.welcome = content || null;
             if (profile.text.welcome === null){
                 response = '✅ Successfully removed the text for welcome messages!';
@@ -65,7 +65,8 @@ module.exports = {
             ephemeral: true
         }))
         .catch(err => interaction.reply({
-            content: `❌ Oops! Something went wrong: ${err.message}`
+            content: `❌ Oops! Something went wrong: ${err.message}`,
+            ephemeral: true
         }));
     }
 };
