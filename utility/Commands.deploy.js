@@ -28,7 +28,7 @@ module.exports = async (Client, Guild) => {
     //.catch(e => console.log(e.rawError.errors.options['1']));
 
 
-    const Commands = Guild.commands.fetch();
+    const Commands = await Guild.commands.fetch();
     let fullPermissions = Commands.filter(command => Permissions.some(x => x.name === command.name))
         .map(command => {
             return {
