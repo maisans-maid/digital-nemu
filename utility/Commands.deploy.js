@@ -17,7 +17,7 @@ module.exports = (Client, Guild) => {
   for (const commandFile of readdirSync(join(__dirname, '../commands')).filter(f => filter(f))){
     const { builder } = require(join(__dirname, '../commands', commandFile));
     if (builder instanceof SlashCommandBuilder){
-      commands.push(builder.toJSON());
+      commands.push(builder.setDefaultPermission(false).toJSON());
     };
   };
 

@@ -27,6 +27,13 @@ module.exports = {
     permissions: allowedPermissions,
     execute: async (client, interaction) => {
 
+        if (!interaction.member.permissions.has('MANAGE_MESSAGES')){
+            return interaction.reply({
+                ephemeral: true,
+                content: '❌ You have no permission to manage webhooks!'
+            });
+        };
+
         const message = interaction.options.getString('message');
         const user = interaction.options.getUser('user');
         const member = await interaction.guild.members.fetch(user.id);

@@ -29,6 +29,13 @@ module.exports = {
     permissions: allowedPermissions,
     execute: async (client, interaction) => {
 
+        if (!interaction.member.permissions.has('MANAGE_GUILD')){
+            return interaction.reply({
+                ephemeral: true,
+                content: '❌ You have no permission to manage this server!'
+            });
+        };
+
         const subcommand = interaction.options.getSubcommand();
         const role = interaction.options.getRole('role');
 
