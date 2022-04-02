@@ -5,6 +5,8 @@ const { MessageEmbed } = require('discord.js');
 
 module.exports = async message => {
 
+    return;
+
     if (message.bot){
         return;
     };
@@ -39,7 +41,7 @@ module.exports = async message => {
     const V_ROLE = message.guild.roles.cache.get(guildSchemaPartial.verificationRoleId);
     const embed = new MessageEmbed().setAuthor({ name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}` }).setColor('ORANGE')
 
-    if (!message.guild.me.roles.cache.has('MANAGE_ROLES')){
+    if (V_CHANNEL && !message.guild.me.roles.cache.has('MANAGE_ROLES')){
         await message.delete().catch(() => {});
         embed.addFields([{
             name: 'Reason',
