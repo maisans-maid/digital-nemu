@@ -1,6 +1,7 @@
 'use strict';
 
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { guildSchemaPartial } = require('../utility/Typedefs.js');
 
 const model = require('../models/guildSchema.js');
 
@@ -127,6 +128,7 @@ module.exports = {
 
         if (subcommand === 'logger'){
             profile.channels.logger = channel ? channel.id : null;
+            client.custom.cache.guildSchemaPartials.set(interaction.guildId, new guildSchemaPartial(interaction.guild, profile));
             if (profile.channels.logger === null){
                 response = '✅ Successfully disabled the audit-logging feature.'
             } else {
@@ -138,10 +140,8 @@ module.exports = {
         };
 
         if (subcommand === 'verify'){
-            profile.channels.verification = channel ? channel.id : null;
-            const guildSchemaPartial = client.custom.cache.guildSchemaPartials.get(interaction.guildId) || {};
-            guildSchemaPartial.verificationChannelId = profile.roles.verification;
-            client.custom.cache.guildSchemaPartials.set(interaction.guildId, guildSchemaPartial);
+            profile.channels.verification = channel?.id || null;
+            client.custom.cache.guildSchemaPartials.set(interaction.guildId, new guildSchemaPartial(interaction.guild, profile));
             if (profile.channels.verification === null){
                 response = '✅ Successfully disabled the verification feature.'
             } else {

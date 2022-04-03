@@ -2,6 +2,8 @@
 
 const model = require('../../models/guildSchema');
 const { MessageEmbed } = require('discord.js');
+const { guildSchemaPartial } = require('../../utility/Typedefs.js');
+const { errorLog } = require('../../utility/Embed.templates.js');
 
 module.exports = async message => {
 
@@ -15,95 +17,76 @@ module.exports = async message => {
         return;
     };
 
-    const guildSchemaPartial = message.client.custom.cache.guildSchemaPartials.get(message.guild.id) || {};
-
-    if (guildSchemaPartial.verificationChannelId === undefined || guildSchemaPartial.verificationRoleId === undefined || guildSchemaPartial.loggerChannelId === undefined){
-        const profile = await model.findByIdOrCreate(message.guild.id).catch(e => e);
+    let cachedSchema = message.client.custom.cache.guildSchemaPartials.get(message.guild.id);
+    if (!cachedSchema){
+        const profile = await model.findByIdOrCreate(message.guildId).catch(e => e);
         if (profile instanceof Error){
             return console.log(profile.message);
         };
-        guildSchemaPartial.verificationChannelId = profile.channels.verification;
-        guildSchemaPartial.verificationRoleId = profile.roles.verification;
-        guildSchemaPartial.loggerChannelId = profile.channels.logger;
-        message.client.custom.cache.guildSchemaPartials.set(message.guild.id, guildSchemaPartial);
+        cachedSchema = new guildSchemaPartial(message.guild, profile);
+        message.client.custom.cache.guildSchemaPartials.set(message.guild.id, cachedSchema);
     };
 
-    if (guildSchemaPartial.verificationChannelId === null){
-        return; // No verification channel found
-    };
-
-    if (guildSchemaPartial.verificationRoleId === null){
-        return; // No verification role found
-    };
-
-    const V_CHANNEL = message.guild.channels.cache.get(guildSchemaPartial.verificationChannelId);
-    const L_CHANNEL = message.guild.channels.cache.get(guildSchemaPartial.loggerChannelId);
-    const V_ROLE = message.guild.roles.cache.get(guildSchemaPartial.verificationRoleId);
-    const embed = new MessageEmbed().setAuthor({ name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}` }).setColor('ORANGE');
-
-    if (message.content === 'sleepy head' && !V_CHANNEL){
-        // Verification is set but the id is now invalid
-        embed.addFields([{
-            name: 'Reason',
-            value: `Invalid verification channelId. (sleepy head) used at ${message.channel}`
-        },{
-            name: 'Suggested Fix',
-            value: 'Reset the verification channel via the \`\setchannel\` command.'
-        }]);
-        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
-            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member.displayName}. Reason: Invalid verification channelId. Suggested Fix: Reset the verification channel via the \`\setchannel\` command.`);
+    const sendError = options => {
+        if (cachedSchema.loggerChannel){
+            return cachedSchema.loggerChannel.send({
+                embeds: [ errorLog({
+                    name: options.name,
+                    reason: options.reason,
+                    fix: options.fix
+                }) ]
+            })
+        } else {
+            return console.log(`${options.name}. Reason: ${options.reason || 'N/A'}. Suggested Fix: ${options.fix || 'N/A'}`);
         };
-        return L_CHANNEL.send({ embeds: [embed] });
     };
 
-    if (!V_CHANNEL){
+    // Ignore messages that was not sent on the verification channel
+    if (message.channel.id !== cachedSchema.verificationChannelId){
         return;
     };
 
-    if (message.channel.id !== V_CHANNEL.id){
-        return;
-    };
-
+    // Delete messages that are sent in the verification channel
     await message.delete().catch(() => {});
 
-    if (!message.guild.me.permissions.has('MANAGE_ROLES')){
-        embed.addFields([{
-            name: 'Reason',
-            value: 'I have no permission to add roles.'
-        },{
-            name: 'Suggested Fix',
-            value: 'Grant me the `Manage Roles` permission.'
-        }]);
-        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
-            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member.displayName}. Reason: I have no permission to add roles. Suggested Fix: Grant me the \`Manage Roles\` permission.`);
-        };
-        return L_CHANNEL.send({ embeds: [embed] });
+    // A message was sent on a verification channel but there was not verification role
+    if (!cachedSchema.verificationRoleId){
+        return sendError({
+            name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}`,
+            reason: 'Verification Channel was set, but there was no Verification Role',
+            fix: 'Set the Verification role via the `\setrole` command.'
+        });
     };
 
-    if (!V_ROLE){
-        embed.addFields([{
-            name: 'Reason',
-            value: 'Invalid verification roleId'
-        },{
-            name: 'Suggested Fix',
-            value: 'Reset the verification role via the \`\setrole\` command.'
-        }]);
-        if (!L_CHANNEL || !L_CHANNEL.permissionsFor(message.client.user).has('SEND_MESSAGES', 'EMBED_LINKS')){
-            return console.log(`❌ IMPORTANT: Member verification failed for ${message.member}.\nReason: Invalid verification roleId\nSuggested fix: Reset the verification role via the \`\setrole\` command.`);
-        };
-        return L_CHANNEL.send({ embeds: [embed] });
-    };
-
+    // The message that was sent was not verifiable
     if (message.content !== 'sleepy head'){
-        return ;
+        return;
     };
 
-    if (message.member.roles.cache.has(V_ROLE.id)){
-        return ; // Member already has the verified role
+    // The member has the role already
+    if (message.member.roles.cache.has(cachedSchema.verificationRoleId)){
+        return;
     };
 
-    await message.member.roles.add(V_ROLE.id)
+    // The bot (this one) has no permission to add roles to members
+    if (!message.guild.me.permissions.has('MANAGE_ROLES')){
+        return sendError({
+            name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}`,
+            reason: 'I have no permission to assign roles to members!',
+            fix: 'Grant me the **Manage Roles** Permission'
+        });
+    };
+
+    // The configured Role Id does not exist on the guild (anymore)
+    if (!cachedSchema.verificationRole){
+        return sendError({
+            name: `❌ IMPORTANT: Member verification failed for ${message.member.displayName}`,
+            reason: 'The configured Verification Role does not exist on this server!',
+            fix: 'Reassign a verification role via the `\setrole` command.'
+        });
+    };
+
+    await message.member.roles.add(cachedSchema.verificationRole)
         .then(() => {/*Insert code here what to do if a member is verified*/})
         .catch(console.error);
-
 };

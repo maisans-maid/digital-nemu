@@ -4,8 +4,9 @@ const { createCanvas, loadImage } = require('node-canvas');
 const { readdirSync } = require('fs');
 const { join } = require('path');
 const GIFEncoder = require('gifencoder');
+const { errorLog } = require('./Embed.templates.js');
 
-module.exports = (guildMember, channel, content) => {
+module.exports = async (guildMember, channel, content, logger) => {
 
     const canvas = createCanvas(800, 450);
     const ctx = canvas.getContext('2d');
@@ -17,32 +18,38 @@ module.exports = (guildMember, channel, content) => {
     ctx.fillText(`Welcome to my Cattery,`, 100, 370);
     ctx.fillText(`${name}!`, 100, 410);
 
-    return new Promise(async resolve => {
-      const encoder = new GIFEncoder(width, height);
-      const buffers = [];
-      const pushBuffers = buffer => buffers.push(buffer);
+    const encoder = new GIFEncoder(width, height);
+    const buffers = [];
+    const pushBuffers = buffer => buffers.push(buffer);
 
-      encoder.createReadStream()
-          .on('data', pushBuffers)
-          .on('end', resolve(Buffer.concat(buffers)));
+    encoder.createReadStream()
+        .on('data', pushBuffers)
+        .on('end', () => {
+            channel.send({ content, files: [{
+                name: 'welcome.gif',
+                attachment: Buffer.concat(buffers)
+            }]})
+            .catch(e => logger.send({ embeds: [ errorLog({
+                name: '❌ DiscordAPIError: ' + e.message
+            }) ]}));
+        });
 
-      encoder.start();
-      encoder.setRepeat(0);
-      encoder.setDelay(65);
+    encoder.start();
+    encoder.setRepeat(0);
+    encoder.setDelay(65);
 
-      for (const image of readdirSync(join(__dirname, '../assets/images/welcome'))){
-          const cvs = createCanvas(width, height);
-          const ct  = cvs.getContext('2d');
-          const frame = await loadImage(join(__dirname, '../assets/images/welcome', image));
+    for (const image of readdirSync(join(__dirname, '../assets/images/welcome'))){
+        const cvs = createCanvas(width, height);
+        const ct  = cvs.getContext('2d');
+        const frame = await loadImage(join(__dirname, '../assets/images/welcome', image));
 
-          ct.drawImage(frame, 0, 0);
-          ct.drawImage(canvas, 0, 0);
+        ct.drawImage(frame, 0, 0);
+        ct.drawImage(canvas, 0, 0);
 
-          encoder.addFrame(ct);
-      };
+        encoder.addFrame(ct);
+    };
 
-      encoder.finish();
+    encoder.finish();
 
-      return;
-    });
+    return;
 };

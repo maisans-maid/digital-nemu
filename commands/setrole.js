@@ -1,6 +1,7 @@
 'use strict';
 
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { guildSchemaPartial } = require('../utility/Typedefs.js');
 
 const model = require('../models/guildSchema.js');
 
@@ -52,9 +53,7 @@ module.exports = {
 
         if (subcommand === 'verify'){
             profile.roles.verification = role ? role.id : null;
-            const guildSchemaPartial = client.custom.cache.guildSchemaPartials.get(interaction.guildId) || {};
-            guildSchemaPartial.verificationRoleId = profile.roles.verification;
-            client.custom.cache.guildSchemaPartials.set(interaction.guildId, guildSchemaPartial);
+            client.custom.cache.guildSchemaPartials.set(interaction.guildId, new guildSchemaPartial(interaction.guild, profile));
             if (profile.roles.verification === null){
                 response = '✅ Successfully removed verification role.'
             } else {

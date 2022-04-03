@@ -35,13 +35,7 @@ module.exports = async (client, guildMember) => {
     };
 
     const content = modify(guildProfile.text.welcome, guildMember);
-    const attachment = await generateCanvas(guildMember);
-
-    return channel.send({ content, files: [{
-        attachment, name: 'welcome.gif'
-    }]}).catch(e => logger.send({ embeds: [ errorLog({
-        name: '❌ DiscordAPIError: ' + e.message
-    }) ]}));
+    generateCanvas(guildMember, channel, content, logger);
 };
 
 
