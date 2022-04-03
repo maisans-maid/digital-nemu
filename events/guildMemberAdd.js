@@ -1,24 +1,47 @@
 'use strict';
 
-const handleWcMsg = require('../utility/Canvas.welcome.js');
+const generateCanvas = require('../utility/Canvas.welcome.js');
 const model = require('../models/guildSchema.js');
 const moment = require('moment');
+const { errorLog } = require('../utility/Embed.templates.js');
 
 module.exports = async (client, guildMember) => {
 
-    const guildProfile = await model.findByIdOrCreate(guildMember.id).catch(e => e);
+    const guildProfile = await model.findByIdOrCreate(guildMember.guild.id).catch(e => e);
     if (guildProfile instanceof Error){
         return;
     };
 
-    const channel = guildMember.guild.channels.cache.get(guildProfile.channels.welcome || '896884423847456778');
-    if (!channel || !channel.permissionsFor(client.user).has('VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES')){
-        return //console.log('Channel not found or Insuffecient Permissions @ Canvas.welcome');
+    const channel = guildMember.guild.channels.cache.get(guildProfile.channels.welcome);
+    const logger = guildMember.guild.channels.cache.get(guildProfile.channels.logger);
+
+    if (!channel || !channel.permissionsFor(client.user).has(['VIEW_CHANNEL', 'SEND_MESSAGES', 'ATTACH_FILES'])){
+        if (!logger){
+            return console.log('Channel not found or Insuffecient Permissions @ Canvas.welcome');
+        };
+        if (!channel){
+            return logger.send({ embeds: errorLog({
+                name: '❌ Unable to send a Welcome Message!',
+                reason: 'Welcome channel could not be found!',
+                fix: 'Reset the welcome channel thru the `setchannel` command'
+            }) }).catch(() => {})
+        } else {
+          return logger.send({ embeds: errorLog({
+              name: '❌ Unable to send a Welcome Message!',
+              reason: 'I have no permission to **View Channel**, **Send Message** on the welcome channel or **Attach Files**!',
+              fix: 'Grant me the **View Channel**, **Send Message**, and **Attach Files** permissions.'
+          }) }).catch(() => {})
+        };
     };
 
-    const text = guildProfile.text.welcome;
+    const content = modify(guildProfile.text.welcome, guildMember);
+    const attachment = await generateCanvas(guildMember);
 
-    handleWcMsg(guildMember, channel, modify(text, guildMember));
+    return channel.send({ content, files: [{
+        attachment, name: 'welcome.gif'
+    }]}).catch(e => logger.send({ embeds: [ errorLog({
+        name: '❌ DiscordAPIError: ' + e.message
+    }) ]}));
 };
 
 

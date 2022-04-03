@@ -5,7 +5,7 @@ const { readdirSync } = require('fs');
 const { join } = require('path');
 const GIFEncoder = require('gifencoder');
 
-module.exports = async (guildMember, channel, content) => {
+module.exports = (guildMember, channel, content) => {
 
     const canvas = createCanvas(800, 450);
     const ctx = canvas.getContext('2d');
@@ -17,35 +17,32 @@ module.exports = async (guildMember, channel, content) => {
     ctx.fillText(`Welcome to my Cattery,`, 100, 370);
     ctx.fillText(`${name}!`, 100, 410);
 
-    const encoder = new GIFEncoder(width, height);
-    const buffers = [];
-    const pushBuffers = buffer => buffers.push(buffer);
-    const sendContent = () => channel.send({
-        content: content || undefined,
-        files: [{
-            name: 'welcome.gif',
-            attachment: Buffer.concat(buffers)
-        }]
+    return new Promise(async resolve => {
+      const encoder = new GIFEncoder(width, height);
+      const buffers = [];
+      const pushBuffers = buffer => buffers.push(buffer);
+
+      encoder.createReadStream()
+          .on('data', pushBuffers)
+          .on('end', resolve(Buffer.concat(buffers)));
+
+      encoder.start();
+      encoder.setRepeat(0);
+      encoder.setDelay(65);
+
+      for (const image of readdirSync(join(__dirname, '../assets/images/welcome'))){
+          const cvs = createCanvas(width, height);
+          const ct  = cvs.getContext('2d');
+          const frame = await loadImage(join(__dirname, '../assets/images/welcome', image));
+
+          ct.drawImage(frame, 0, 0);
+          ct.drawImage(canvas, 0, 0);
+
+          encoder.addFrame(ct);
+      };
+
+      encoder.finish();
+
+      return;
     });
-
-    encoder.createReadStream()
-        .on('data', pushBuffers)
-        .on('end', sendContent);
-
-    encoder.start();
-    encoder.setRepeat(0);
-    encoder.setDelay(65);
-
-    for (const image of readdirSync(join(__dirname, '../assets/images/welcome'))){
-        const cvs = createCanvas(width, height);
-        const ct  = cvs.getContext('2d');
-        const frame = await loadImage(join(__dirname, '../assets/images/welcome', image));
-
-        ct.drawImage(frame, 0, 0);
-        ct.drawImage(canvas, 0, 0);
-
-        encoder.addFrame(ct);
-    };
-
-    encoder.finish();
 };
