@@ -63,7 +63,7 @@ module.exports = {
 
     let counter = 0;
     let currentComponentState = components;
-    const highestScore = await model.find({}).sort({ 'minesweeper.gameStats.highestScore': -1 }).limit(1);
+    const highestScore = await model.find({}).sort({ 'gameStats.minesweeper.highestScore': -1 }).limit(1);
     const highestScoreUsername = await interaction.client.users.fetch(highestScore[0]._id)
         .then(user => user.tag)
         .catch(() => 'Unknown');
