@@ -11,6 +11,7 @@ const command = new SlashCommandBuilder()
     .setName('amount')
     .setDescription('Amount of messages to delete')
     .setRequired(true)
+    .setMinValue(1)
 )
 
 const allowedPermissions = Guild => Guild.roles.cache
