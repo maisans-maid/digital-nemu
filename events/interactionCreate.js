@@ -1,6 +1,7 @@
 'use strict';
 
 const handleTicket = require('../processes/ticket-tool/handles/handle.main.js')
+const handlePoll = require('../processes/poll/poll.handle.js');
 
 module.exports = (client, interaction) => {
     if (interaction.isCommand()){
@@ -30,5 +31,6 @@ module.exports = (client, interaction) => {
 
     if (interaction.isButton()){
         handleTicket(interaction);
+        handlePoll(interaction);
     };
 };

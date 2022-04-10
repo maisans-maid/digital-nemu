@@ -1,6 +1,7 @@
 'use strict';
 
 const logger = require('../utility/Logs.message-delete.js');
+const model = require('../models/guildSchema.js');
 
 module.exports = async (client, message) => {
 
@@ -11,6 +12,8 @@ module.exports = async (client, message) => {
     // ].includes(message.channel.id)){
     //     return;
     // };
+
+    if (message.author?.bot) return;
 
     const guildSchemaPartial = message.client.custom.cache.guildSchemaPartials.get(message.guild.id) || {};
 
