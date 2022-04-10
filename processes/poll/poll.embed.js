@@ -34,7 +34,7 @@ module.exports = async (pollDocument, user) => {
             name: author.username,
             iconURL: author.displayAvatarURL()
         })
-        .addFields(pollDocument.choices.map((choice, index) => {
+        .addFields([...pollDocument.choices.values()].map((choice, index) => {
             return {
                 name: `[${index + 1}] ${choice.topic}`,
                 value: createProgressBar(choice, total)

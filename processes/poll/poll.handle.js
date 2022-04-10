@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 const model = require('../../models/pollSchema.js');
 const embedTemplate = require('./poll.embed.js');
 const componentsTemplate = require('./poll.components.js');
@@ -21,7 +21,7 @@ module.exports = async interaction => {
       if (interaction.member.id !== pollDocument.authorId){
           return interaction.reply({
               ephemeral: true,
-              content: '❌ You cannot control this poll'
+              content: `❌ Only <@${pollDocument.authorId}> may control this poll!`
           });
 
       };
@@ -36,21 +36,30 @@ module.exports = async interaction => {
         if (interaction.member.id !== pollDocument.authorId){
             return interaction.reply({
                 ephemeral: true,
-                content: '❌ You cannot control this poll'
+                content: `❌ Only <@${pollDocument.authorId}> may control this poll!`
             });
         };
 
-        const components_ = interaction.message.components.map(ActionRow => new MessageActionRow().addComponents(
+        const components = interaction.message.components.slice(interaction.message.components.length - 1).map(ActionRow => new MessageActionRow().addComponents(
             ActionRow.components.map(Button =>
                 Button.customId.split(':').pop() === 'RECENT'
                     ? new MessageButton(Button)
                     : new MessageButton(Button).setDisabled(true)
             )
         ));
-        return interaction.update({
-            embeds: interaction.embeds,
-            components: components_
-        });
+
+        pollDocument.choices = new Map([...pollDocument.choices.entries()]
+            .sort(([kA, vA],[kB, vB]) => vB.voters.length - vA.voters.length)
+            .map(([k, v], i) => [k , {
+                id: v.id,
+                topic: `${['🥇 ', '🥈 ', '🥉 '][i] || ''} ${v.topic}`,
+                voters: v.voters
+            }])
+        );
+        pollDocument.topic = `${pollDocument.topic} (Ended)`;
+        const embeds = [ await embedTemplate(pollDocument, interaction.user) ];
+
+        return interaction.update({ embeds, components });
     };
 
     pollDocument.addVote({ choiceId, userId: interaction.member.id });
@@ -62,10 +71,9 @@ module.exports = async interaction => {
         embeds: [ embed ],
         components
     })
-    .then(() => pollDocument.save())
+    .then(() => pollDocument.processVotes().save())
     .catch(err => interaction.reply({
         ephemeral: true,
         content: `❌ Error: ${err.message}`
     }));
-
 };

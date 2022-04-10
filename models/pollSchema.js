@@ -6,15 +6,15 @@ const PollSchema = new Schema({
     channelId: { type: String, default: null },
     authorId: { type: String, default: null },
     topic: { type: String, default: null },
-    choices: { type: Array, default: [] },
+    choices: { type: Map, default: new Map() },
     timestamp: { type: Date, default: Date.now() },
 }, {
     versionKey: false
 });
 
 PollSchema.methods.addChoice = function addChoice(topic){
-    this.choices.push({
-        id: this.choices.length + 1,
+    this.choices.set((this.choices.size + 1).toString(), {
+        id: this.choices.size + 1,
         topic: topic,
         voters: []
     });
@@ -22,20 +22,37 @@ PollSchema.methods.addChoice = function addChoice(topic){
 };
 
 PollSchema.methods.totalVotes = function totalVotes(){
-    return this.choices.reduce((acc, cur) => cur.voters.length + acc, 0);
+    return Array.from(this.choices).map(x => x[1]).reduce((acc, cur) => cur.voters.length + acc, 0);
 };
 
 PollSchema.methods.addVote = function addVote(options){
     const userId = options.userId;
     const choiceId = options.choiceId;
-    const choiceIndex = this.choices.findIndex(x => x.id == choiceId);
+    const choiceArray = [...this.choices.values()];
 
-    // if (this.choices.some(choice => choice.voters.includes(userId))){
-    //     const index1 = this.choices.findIndex(choice => choice.voters.includes(userId));
-    //     this.choices[index1].voters.splice(this.choices[index1].voters.findIndex(v => voterID === userId), 1);
-    // };
+    if (choiceArray.some(x => x.voters.includes(userId))){
+        const key = [...this.choices.entries()]
+            .filter(([k, v]) => v.voters.includes(userId))
+            .map(([k, v]) => k)[0];
 
-    this.choices[choiceIndex].voters.push(userId);
+        if (choiceId === key){
+            return this;
+        };
+
+        const choice = this.choices.get(key);
+        choice.voters.splice(choice.voters.indexOf(userId), 1);
+        this.choices.set(key, choice);
+    };
+
+    const selection = this.choices.get(choiceId);
+    selection.voters.push(userId)
+    this.choices.set(choiceId, selection);
+
+    return this;
+};
+
+PollSchema.methods.processVotes = function processVotes(){
+    this.choices = Object.fromEntries(this.choices);
     return this;
 };
 

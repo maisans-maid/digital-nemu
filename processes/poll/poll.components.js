@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { MessageActionRow, MessageButton } = require('discord.js');
 
 module.exports = PollDocument => {
-    const buttons = PollDocument.choices.map((choice, index) => {
+    const buttons = [...PollDocument.choices.values()].map((choice, index) => {
         return new MessageButton()
         .setLabel(`${index + 1}`)
         .setStyle('SECONDARY')
