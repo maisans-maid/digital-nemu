@@ -149,7 +149,7 @@ module.exports = {
 
         newComponents = generateComponent(moveCounter, message.components, x, y)
 
-        bestMove = game.getBestMove();
+        bestMove = [game.getBestMove(), makeDumbMove(game), makeDumbMove(game), makeDumbMove(game)][_.random(0,3)];
         privateEnum = game.makeNextMove(bestMove.x, bestMove.y);
 
         moveCounter++;
@@ -209,4 +209,23 @@ function generateComponent(moveCounter, components, x, y, end){
             .setDisabled(true)
         })
     ));
+};
+
+function makeDumbMove(game){
+    let acceptable = false, x, y, _x = 0, _y = 0;
+    while (!acceptable){
+        const cell = game.board[_y][_x];
+        if (cell === 0){
+            x = _x;
+            y = _y;
+            acceptable = true;
+        } else {
+            _x++;
+            if (_x > 2){
+                _x = 0;
+                _y++;
+            };
+        };
+    };
+    return { x, y };
 };
